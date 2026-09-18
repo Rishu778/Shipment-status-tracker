@@ -1,5 +1,10 @@
 import axios from "axios";
-import type { CreateShipmentInput, Shipment, ShipmentStatus } from "../types/shipment";
+import type {
+  CreateShipmentInput,
+  Shipment,
+  ShipmentStatus,
+  UpdateShipmentStatusInput,
+} from "../types/shipment";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -29,6 +34,14 @@ export const getShipmentById = async (id: string): Promise<Shipment> => {
 
 export const createShipment = async (shipment: CreateShipmentInput): Promise<Shipment> => {
   const response = await api.post("/shipments", shipment);
+  return response.data.shipment;
+};
+
+export const updateShipmentStatus = async (
+  id: string,
+  update: UpdateShipmentStatusInput
+): Promise<Shipment> => {
+  const response = await api.patch(`/shipments/${id}/status`, update);
   return response.data.shipment;
 };
 
