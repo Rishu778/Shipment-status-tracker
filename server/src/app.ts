@@ -1,5 +1,6 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import shipmentRoutes from './routes/shipment.routes';
 
 const app: Application = express();
 
@@ -14,5 +15,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
     message: 'Shipment Tracker API is running',
   });
 });
+
+// Shipment routes
+app.use('/api/shipments', shipmentRoutes);
 
 export default app;
