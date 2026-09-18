@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Shipment, ShipmentStatus } from "../types/shipment";
+import type { CreateShipmentInput, Shipment, ShipmentStatus } from "../types/shipment";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -20,6 +20,11 @@ export const getShipments = async (
   });
 
   return response.data.shipments;
+};
+
+export const createShipment = async (shipment: CreateShipmentInput): Promise<Shipment> => {
+  const response = await api.post("/shipments", shipment);
+  return response.data.shipment;
 };
 
 export default api;
