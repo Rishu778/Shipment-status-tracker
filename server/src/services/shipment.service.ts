@@ -88,6 +88,22 @@ export const getShipmentById = async (id: string) => {
 };
 
 /**
+ * Finds a single shipment by its ID with its complete status history ordered chronologically (oldest to newest).
+ */
+export const getShipmentByIdWithHistory = async (id: string) => {
+  return await prisma.shipment.findUnique({
+    where: { id },
+    include: {
+      statusHistory: {
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  });
+};
+
+/**
  * Updates a shipment's current status and creates a new status history entry
  * using Prisma nested relation write (no interactive transaction).
  */

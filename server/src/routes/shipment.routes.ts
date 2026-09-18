@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createShipmentHandler,
+  getShipmentByIdHandler,
   getShipmentsHandler,
   updateShipmentStatusHandler,
 } from '../controllers/shipment.controller';
@@ -9,6 +10,9 @@ const router = Router();
 
 // GET /api/shipments
 router.get('/', getShipmentsHandler);
+
+// GET /api/shipments/:id
+router.get('/:id', getShipmentByIdHandler);
 
 // POST /api/shipments
 router.post('/', createShipmentHandler);

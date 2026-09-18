@@ -3,6 +3,7 @@ import { Prisma, ShipmentStatus } from '../generated/prisma/client';
 import {
   createShipment,
   getShipmentById,
+  getShipmentByIdWithHistory,
   getShipments,
   updateShipmentStatus,
 } from '../services/shipment.service';
@@ -74,6 +75,53 @@ export const getShipmentsHandler = async (req: Request, res: Response): Promise<
     console.error('Error fetching shipments:', error);
     res.status(500).json({
       message: 'Failed to fetch shipments',
+    });
+  }
+};
+
+/**
+ * Controller to handle retrieving a single shipment by ID with its status history.
+ */
+export const getShipmentByIdHandler = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  if (!id || typeof id !== 'string' || !id.trim()) {
+    res.status(400).json({
+      message: 'Shipment ID is required',
+    });
+    return;
+  }
+
+  try {
+    const shipment = await getShipmentByIdWithHistory(id.trim());
+
+    if (!shipment) {
+      res.status(404).json({
+        message: `Shipment with ID '${id}' not found`,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      shipment,
+    });
+  } catch (error: any) {
+    // Handle invalid UUID/ID format from Prisma / Postgres cleanly
+    if (
+      (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2023') ||
+      error?.code === '22P02' ||
+      error?.name === 'PrismaClientValidationError'
+    ) {
+      res.status(400).json({
+        message: `Invalid shipment ID: '${id}'`,
+      });
+      return;
+    }
+
+    console.error('Error fetching shipment by ID:', error);
+    res.status(500).json({
+      message: 'Failed to fetch shipment',
     });
   }
 };
