@@ -1,35 +1,107 @@
-import React from 'react';
-import SearchBar from '../components/SearchBar';
+import { useEffect, useState } from "react";
+import type { Shipment, ShipmentStatus } from "../types/shipment";
+import { getShipments } from "../services/api";
+import ShipmentCard from "../components/ShipmentCard";
 
-export const Dashboard: React.FC = () => {
+const statuses: ShipmentStatus[] = [
+  "BOOKED",
+  "IN_TRANSIT",
+  "CUSTOMS_HOLD",
+  "DELIVERED",
+];
+
+const Dashboard = () => {
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<ShipmentStatus | "">("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadShipments = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getShipments(search, status);
+      setShipments(data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load shipments.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      loadShipments();
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [search, status]);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Shipments Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Monitor and track live shipments across all operational statuses.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">
+          Shipment Dashboard
+        </h1>
+        <p className="mt-1 text-slate-500">
+          Track and manage shipment status.
+        </p>
       </div>
 
-      {/* Search & Filter section placeholder */}
-      <SearchBar />
+      <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+        <input
+          type="text"
+          placeholder="Search by reference number..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-500"
+        />
 
-      {/* Shipments List placeholder */}
-      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-        <div className="mx-auto max-w-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-4">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-base font-semibold text-slate-900">Shipment List Ready</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Backend API integration for fetching and filtering shipments will be connected in the upcoming milestone.
-          </p>
-        </div>
+        <select
+          value={status}
+          onChange={(e) =>
+            setStatus(e.target.value as ShipmentStatus | "")
+          }
+          className="rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-500"
+        >
+          <option value="">All statuses</option>
+
+          {statuses.map((item) => (
+            <option key={item} value={item}>
+              {item.replace("_", " ")}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {loading && (
+        <div className="rounded-lg bg-white p-8 text-center text-slate-500">
+          Loading shipments...
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="rounded-lg bg-red-50 p-4 text-red-700">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && shipments.length === 0 && (
+        <div className="rounded-lg bg-white p-8 text-center text-slate-500">
+          No shipments found.
+        </div>
+      )}
+
+      {!loading && !error && shipments.length > 0 && (
+        <div className="grid gap-4">
+          {shipments.map((shipment) => (
+            <ShipmentCard key={shipment.id} shipment={shipment} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

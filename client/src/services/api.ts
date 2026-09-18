@@ -1,16 +1,25 @@
-import axios from 'axios';
+import axios from "axios";
+import type { Shipment, ShipmentStatus } from "../types/shipment";
 
-/**
- * Axios instance configured with base API URL.
- * Reads base URL from VITE_API_BASE_URL, falling back to '/api' for proxy setups.
- */
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
-
-export const api = axios.create({
-  baseURL,
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
+
+export const getShipments = async (
+  search?: string,
+  status?: ShipmentStatus | ""
+): Promise<Shipment[]> => {
+  const response = await api.get("/shipments", {
+    params: {
+      ...(search ? { search } : {}),
+      ...(status ? { status } : {}),
+    },
+  });
+
+  return response.data.shipments;
+};
 
 export default api;
