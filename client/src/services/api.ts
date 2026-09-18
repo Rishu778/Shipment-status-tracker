@@ -22,6 +22,11 @@ export const getShipments = async (
   return response.data.shipments;
 };
 
+export const getShipmentById = async (id: string): Promise<Shipment> => {
+  const response = await api.get(`/shipments/${id}`);
+  return response.data.shipment;
+};
+
 export const createShipment = async (shipment: CreateShipmentInput): Promise<Shipment> => {
   const response = await api.post("/shipments", shipment);
   return response.data.shipment;
