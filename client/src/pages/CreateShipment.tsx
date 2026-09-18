@@ -58,9 +58,9 @@ export const CreateShipment = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Create New Shipment</h1>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="border-b border-slate-200 pb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Create New Shipment</h1>
         <p className="mt-1 text-sm text-slate-500">
           Register a new shipment in the tracking system with initial status BOOKED.
         </p>
@@ -139,11 +139,11 @@ export const CreateShipment = () => {
           </label>
         </div>
 
-        <div className="flex justify-end border-t border-slate-100 pt-5">
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex min-w-40 items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
+            className="inline-flex w-full min-w-40 items-center justify-center sm:w-auto rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
             {isSubmitting ? "Creating shipment..." : "Create Shipment"}
           </button>

@@ -1,25 +1,31 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink, Link } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import CreateShipment from './pages/CreateShipment';
-import ShipmentDetails from './pages/ShipmentDetails';
+import React from "react";
+import { BrowserRouter, Link, NavLink, Route, Routes } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import CreateShipment from "./pages/CreateShipment";
+import ShipmentDetails from "./pages/ShipmentDetails";
+
+const navigationClassName = (isActive: boolean) =>
+  `rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+    isActive
+      ? "bg-blue-50 text-blue-700"
+      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+  }`;
 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-        {/* Navigation Bar */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex items-center space-x-8">
-                {/* Brand / Logo */}
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-8">
                 <Link
                   to="/"
-                  className="flex items-center space-x-3 text-slate-900 font-semibold tracking-tight hover:opacity-90 transition-opacity"
+                  aria-label="Shipment Status Tracker dashboard"
+                  className="flex min-w-0 items-center gap-3 font-semibold tracking-tight text-slate-900 transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -28,47 +34,26 @@ export const App: React.FC = () => {
                       />
                     </svg>
                   </div>
-                  <span className="text-lg font-bold text-slate-900">Shipment Status Tracker</span>
+                  <span className="hidden truncate text-lg font-bold sm:inline">Shipment Status Tracker</span>
                 </Link>
 
-                {/* Primary Nav Links */}
-                <nav className="hidden sm:flex space-x-2">
-                  <NavLink
-                    to="/"
-                    end
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      }`
-                    }
-                  >
+                <nav className="hidden items-center gap-2 sm:flex" aria-label="Primary navigation">
+                  <NavLink to="/" end className={({ isActive }) => navigationClassName(isActive)}>
                     Dashboard
                   </NavLink>
-                  <NavLink
-                    to="/create"
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      }`
-                    }
-                  >
+                  <NavLink to="/create" className={({ isActive }) => navigationClassName(isActive)}>
                     Create Shipment
                   </NavLink>
                 </nav>
               </div>
 
-              {/* Mobile Navigation Links */}
-              <div className="flex items-center sm:hidden space-x-2">
+              <nav className="flex items-center gap-1 sm:hidden" aria-label="Mobile navigation">
                 <NavLink
                   to="/"
                   end
                   className={({ isActive }) =>
-                    `px-2.5 py-1.5 rounded-md text-xs font-medium ${
-                      isActive ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600'
+                    `rounded-md px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600"
                     }`
                   }
                 >
@@ -77,20 +62,19 @@ export const App: React.FC = () => {
                 <NavLink
                   to="/create"
                   className={({ isActive }) =>
-                    `px-2.5 py-1.5 rounded-md text-xs font-medium ${
-                      isActive ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600'
+                    `rounded-md px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600"
                     }`
                   }
                 >
                   Create
                 </NavLink>
-              </div>
+              </nav>
             </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/create" element={<CreateShipment />} />
@@ -98,7 +82,6 @@ export const App: React.FC = () => {
           </Routes>
         </main>
 
-        {/* Minimal Footer */}
         <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
           Shipment Status Tracker &copy; {new Date().getFullYear()}
         </footer>

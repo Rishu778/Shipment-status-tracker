@@ -165,7 +165,7 @@ export const ShipmentDetails = () => {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link to="/" className="text-sm font-medium text-blue-600 hover:text-blue-700">
             &larr; Return to Dashboard
@@ -261,11 +261,11 @@ export const ShipmentDetails = () => {
               </label>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 pt-5">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="inline-flex min-w-36 items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
+                className="inline-flex w-full min-w-36 items-center justify-center sm:w-auto rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
               >
                 {isUpdating ? "Updating status..." : "Update Status"}
               </button>
