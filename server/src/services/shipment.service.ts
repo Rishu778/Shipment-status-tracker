@@ -1,55 +1,29 @@
-// import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma';
+import { Prisma, ShipmentStatus } from '../generated/prisma/client';
 
-// export interface CreateShipmentInput {
-//   referenceNumber: string;
-//   origin: string;
-//   destination: string;
-//   expectedDeliveryDate: Date;
-// }
-
-// /**
-//  * Creates a shipment and its initial status history entry atomically.
-//  */
-// export const createShipment = async (input: CreateShipmentInput) => {
-//   return await prisma.$transaction(async (tx) => {
-//     // 1. Create the Shipment record with initial status BOOKED
-//     const shipment = await tx.shipment.create({
-//       data: {
-//         referenceNumber: input.referenceNumber,
-//         origin: input.origin,
-//         destination: input.destination,
-//         currentStatus: 'BOOKED',
-//         expectedDeliveryDate: input.expectedDeliveryDate,
-//       },
-//     });
-
-//     // 2. Create the first ShipmentStatusHistory entry
-//     await tx.shipmentStatusHistory.create({
-//       data: {
-//         shipmentId: shipment.id,
-//         status: 'BOOKED',
-//         note: 'Shipment created',
-//       },
-//     });
-
-//     return shipment;
-//   });
-// };
-
-import { prisma } from "../lib/prisma";
-
-interface CreateShipmentInput {
+export interface CreateShipmentInput {
   referenceNumber: string;
   origin: string;
   destination: string;
-  expectedDeliveryDate: string;
+  expectedDeliveryDate: string | Date;
 }
 
+export interface GetShipmentsFilters {
+  search?: string;
+  status?: ShipmentStatus;
+}
+
+/**
+ * Creates a shipment and its initial status history entry.
+ */
 export const createShipment = async (data: CreateShipmentInput) => {
-  const expectedDeliveryDate = new Date(data.expectedDeliveryDate);
+  const expectedDeliveryDate =
+    typeof data.expectedDeliveryDate === 'string'
+      ? new Date(data.expectedDeliveryDate)
+      : data.expectedDeliveryDate;
 
   if (Number.isNaN(expectedDeliveryDate.getTime())) {
-    throw new Error("Invalid expected delivery date");
+    throw new Error('Invalid expected delivery date');
   }
 
   const shipment = await prisma.shipment.create({
@@ -58,12 +32,12 @@ export const createShipment = async (data: CreateShipmentInput) => {
       origin: data.origin,
       destination: data.destination,
       expectedDeliveryDate,
-      currentStatus: "BOOKED",
+      currentStatus: 'BOOKED',
 
       statusHistory: {
         create: {
-          status: "BOOKED",
-          note: "Shipment created",
+          status: 'BOOKED',
+          note: 'Shipment created',
         },
       },
     },
@@ -73,4 +47,75 @@ export const createShipment = async (data: CreateShipmentInput) => {
   });
 
   return shipment;
+};
+
+/**
+ * Fetches shipments sorted by newest first, with optional search and status filtering.
+ */
+export const getShipments = async (filters: GetShipmentsFilters = {}) => {
+  const { search, status } = filters;
+
+  const where: Prisma.ShipmentWhereInput = {};
+
+  // Case-insensitive partial match on referenceNumber
+  if (search && search.trim()) {
+    where.referenceNumber = {
+      contains: search.trim(),
+      mode: 'insensitive',
+    };
+  }
+
+  // Exact match on currentStatus
+  if (status) {
+    where.currentStatus = status;
+  }
+
+  return await prisma.shipment.findMany({
+    where,
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
+
+/**
+ * Finds a single shipment by its ID.
+ */
+export const getShipmentById = async (id: string) => {
+  return await prisma.shipment.findUnique({
+    where: { id },
+  });
+};
+
+/**
+ * Updates a shipment's current status and creates a new status history entry
+ * using Prisma nested relation write (no interactive transaction).
+ */
+export const updateShipmentStatus = async (
+  id: string,
+  status: ShipmentStatus,
+  note?: string
+) => {
+  const trimmedNote = typeof note === 'string' && note.trim() ? note.trim() : null;
+
+  return await prisma.shipment.update({
+    where: { id },
+    data: {
+      currentStatus: status,
+      statusHistory: {
+        create: {
+          status,
+          note: trimmedNote,
+        },
+      },
+    },
+    include: {
+      statusHistory: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 1,
+      },
+    },
+  });
 };
