@@ -1,12 +1,12 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
-import shipmentRoutes from './routes/shipment.routes';
+import shipmentRoutes from './routes/shipment.routes.js';
 
 const app: Application = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json());  
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {

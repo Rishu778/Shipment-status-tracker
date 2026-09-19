@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { Prisma, ShipmentStatus } from '../generated/prisma/client';
+import { Prisma, ShipmentStatus } from '../generated/prisma/client.js';
 import {
   createShipment,
   getShipmentById,
   getShipmentByIdWithHistory,
   getShipments,
   updateShipmentStatus,
-} from '../services/shipment.service';
+} from '../services/shipment.service.js';
 
 const VALID_STATUSES: ShipmentStatus[] = [
   ShipmentStatus.BOOKED,

@@ -4,7 +4,7 @@ import {
   getShipmentByIdHandler,
   getShipmentsHandler,
   updateShipmentStatusHandler,
-} from '../controllers/shipment.controller';
+} from '../controllers/shipment.controller.js';
 
 const router = Router();
 

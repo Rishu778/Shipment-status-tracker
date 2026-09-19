@@ -1,5 +1,5 @@
-import { prisma } from '../lib/prisma';
-import { Prisma, ShipmentStatus } from '../generated/prisma/client';
+import { prisma } from '../lib/prisma.js';
+import { Prisma, ShipmentStatus } from '../generated/prisma/client.js';
 
 export interface CreateShipmentInput {
   referenceNumber: string;
