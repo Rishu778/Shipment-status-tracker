@@ -118,13 +118,17 @@ export const getShipmentByIdWithHistory = async (id: string) => {
  */
 export const updateShipmentStatus = async (
   id: string,
+  currentStatus: ShipmentStatus,
   status: ShipmentStatus,
   note?: string
 ) => {
   const trimmedNote = typeof note === 'string' && note.trim() ? note.trim() : null;
 
   return await prisma.shipment.update({
-    where: { id },
+    where: {
+      id,
+      currentStatus,
+    },
     data: {
       currentStatus: status,
       statusHistory: {

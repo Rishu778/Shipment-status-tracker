@@ -294,7 +294,12 @@ export const updateShipmentStatusHandler = async (req: Request, res: Response): 
     }
 
     // 4. Update shipment status and create status history entry via nested write
-    const updatedShipment = await updateShipmentStatus(id.trim(), targetStatus, note);
+    const updatedShipment = await updateShipmentStatus(
+      id.trim(),
+      shipment.currentStatus,
+      targetStatus,
+      note
+    );
     const newStatusHistory = updatedShipment.statusHistory[0];
 
     res.status(200).json({
@@ -303,6 +308,13 @@ export const updateShipmentStatusHandler = async (req: Request, res: Response): 
       statusHistory: newStatusHistory,
     });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      res.status(409).json({
+        message: 'Shipment status changed by another request. Please refresh and try again.',
+      });
+      return;
+    }
+
     console.error('Error updating shipment status:', error);
     res.status(500).json({
       message: 'Failed to update shipment status',
