@@ -30,6 +30,24 @@ export interface Shipment {
 }
 
 /**
+ * Pagination metadata returned with shipment lists.
+ */
+export interface PaginationMetadata {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+/**
+ * Paginated shipment-list response.
+ */
+export interface PaginatedShipmentsResponse {
+  shipments: Shipment[];
+  pagination: PaginationMetadata;
+}
+
+/**
  * Data required to create a new shipment.
  */
 export interface CreateShipmentInput {

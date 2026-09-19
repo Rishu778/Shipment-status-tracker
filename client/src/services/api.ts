@@ -1,6 +1,7 @@
 import axios from "axios";
 import type {
   CreateShipmentInput,
+  PaginatedShipmentsResponse,
   Shipment,
   ShipmentStatus,
   UpdateShipmentStatusInput,
@@ -15,16 +16,23 @@ const api = axios.create({
 
 export const getShipments = async (
   search?: string,
-  status?: ShipmentStatus | ""
-): Promise<Shipment[]> => {
+  status?: ShipmentStatus | "",
+  page = 1,
+  limit = 10
+): Promise<PaginatedShipmentsResponse> => {
   const response = await api.get("/shipments", {
     params: {
+      page,
+      limit,
       ...(search ? { search } : {}),
       ...(status ? { status } : {}),
     },
   });
 
-  return response.data.shipments;
+  return {
+    shipments: response.data.shipments,
+    pagination: response.data.pagination,
+  };
 };
 
 export const getShipmentById = async (id: string): Promise<Shipment> => {

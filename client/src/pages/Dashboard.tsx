@@ -3,37 +3,65 @@ import { Link } from "react-router-dom";
 import ShipmentCard from "../components/ShipmentCard";
 import SearchBar from "../components/SearchBar";
 import { getShipments } from "../services/api";
-import type { Shipment, ShipmentStatus } from "../types/shipment";
+import type { PaginationMetadata, Shipment, ShipmentStatus } from "../types/shipment";
+
+const PAGE_LIMIT = 10;
 
 const Dashboard = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<ShipmentStatus | "">("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadShipments = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const data = await getShipments(search, status);
-      setShipments(data);
-    } catch (requestError) {
-      console.error(requestError);
-      setError("We could not load shipments. Please check your connection and try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      void loadShipments();
+    let ignoreResult = false;
+
+    const timeout = window.setTimeout(async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getShipments(search, status, page, PAGE_LIMIT);
+        if (ignoreResult) {
+          return;
+        }
+
+        setShipments(data.shipments);
+        setPagination(data.pagination);
+      } catch (requestError) {
+        if (ignoreResult) {
+          return;
+        }
+
+        console.error(requestError);
+        setError("We could not load shipments. Please check your connection and try again.");
+      } finally {
+        if (!ignoreResult) {
+          setLoading(false);
+        }
+      }
     }, 300);
 
-    return () => window.clearTimeout(timeout);
-  }, [search, status]);
+    return () => {
+      ignoreResult = true;
+      window.clearTimeout(timeout);
+    };
+  }, [search, status, page]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value as ShipmentStatus | "");
+    setPage(1);
+  };
+
+  const totalPages = pagination?.totalPages ?? 0;
 
   return (
     <div className="space-y-6">
@@ -55,8 +83,8 @@ const Dashboard = () => {
         <SearchBar
           search={search}
           status={status}
-          onSearchChange={setSearch}
-          onStatusChange={(value) => setStatus(value as ShipmentStatus | "")}
+          onSearchChange={handleSearchChange}
+          onStatusChange={handleStatusChange}
         />
       </section>
 
@@ -84,11 +112,40 @@ const Dashboard = () => {
       )}
 
       {!loading && !error && shipments.length > 0 && (
-        <section aria-label="Shipment results" className="grid gap-4 lg:grid-cols-2">
-          {shipments.map((shipment) => (
-            <ShipmentCard key={shipment.id} shipment={shipment} />
-          ))}
-        </section>
+        <>
+          <section aria-label="Shipment results" className="grid gap-4 lg:grid-cols-2">
+            {shipments.map((shipment) => (
+              <ShipmentCard key={shipment.id} shipment={shipment} />
+            ))}
+          </section>
+
+          {totalPages > 1 && (
+            <nav
+              aria-label="Shipment pagination"
+              className="flex flex-col items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row"
+            >
+              <button
+                type="button"
+                onClick={() => setPage((currentPage) => currentPage - 1)}
+                disabled={page === 1}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-auto"
+              >
+                Previous
+              </button>
+              <p className="text-sm font-medium text-slate-600">
+                Page {page} of {totalPages}
+              </p>
+              <button
+                type="button"
+                onClick={() => setPage((currentPage) => currentPage + 1)}
+                disabled={page === totalPages}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:w-auto"
+              >
+                Next
+              </button>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );
