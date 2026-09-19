@@ -5,3 +5,9 @@ dist/
 !.env.example
 .vscode/
 .DS_Store
+
+# AI coding tool metadata
+server/.claude/
+server/.agents/
+server/.windsurf/
+server/skills-lock.json
