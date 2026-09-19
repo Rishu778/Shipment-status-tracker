@@ -11,6 +11,8 @@ export interface CreateShipmentInput {
 export interface GetShipmentsFilters {
   search?: string;
   status?: ShipmentStatus;
+  page?: number;
+  limit?: number;
 }
 
 /**
@@ -50,10 +52,10 @@ export const createShipment = async (data: CreateShipmentInput) => {
 };
 
 /**
- * Fetches shipments sorted by newest first, with optional search and status filtering.
+ * Fetches a paginated shipment list sorted by newest first, with optional search and status filtering.
  */
 export const getShipments = async (filters: GetShipmentsFilters = {}) => {
-  const { search, status } = filters;
+  const { search, status, page = 1, limit = 10 } = filters;
 
   const where: Prisma.ShipmentWhereInput = {};
 
@@ -70,12 +72,19 @@ export const getShipments = async (filters: GetShipmentsFilters = {}) => {
     where.currentStatus = status;
   }
 
-  return await prisma.shipment.findMany({
-    where,
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  const [shipments, total] = await Promise.all([
+    prisma.shipment.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.shipment.count({ where }),
+  ]);
+
+  return { shipments, total };
 };
 
 /**

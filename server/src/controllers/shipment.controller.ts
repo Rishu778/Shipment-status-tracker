@@ -66,10 +66,49 @@ export const getShipmentsHandler = async (req: Request, res: Response): Promise<
       }
     }
 
-    const shipments = await getShipments({ search, status });
+    let page = 1;
+    if (req.query.page !== undefined) {
+      if (
+        typeof req.query.page !== 'string' ||
+        !/^[1-9]\d*$/.test(req.query.page) ||
+        !Number.isSafeInteger(Number(req.query.page))
+      ) {
+        res.status(400).json({
+          message: 'page must be a positive integer',
+        });
+        return;
+      }
+
+      page = Number(req.query.page);
+    }
+
+    let limit = 10;
+    if (req.query.limit !== undefined) {
+      if (
+        typeof req.query.limit !== 'string' ||
+        !/^[1-9]\d*$/.test(req.query.limit) ||
+        !Number.isSafeInteger(Number(req.query.limit)) ||
+        Number(req.query.limit) > 100
+      ) {
+        res.status(400).json({
+          message: 'limit must be a positive integer no greater than 100',
+        });
+        return;
+      }
+
+      limit = Number(req.query.limit);
+    }
+
+    const { shipments, total } = await getShipments({ search, status, page, limit });
 
     res.status(200).json({
       shipments,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Error fetching shipments:', error);
