@@ -181,11 +181,11 @@ DIRECT_URL=<SUPABASE_SESSION_POOLER_URL>
 
 Never commit real database passwords, connection strings, or other secrets.
 
-Generate the Prisma client, build the backend, and start development mode:
+Generate the Prisma client, apply the database migrations, and start development mode:
 
 ```bash
 npx prisma generate
-npm run build
+npx prisma migrate deploy
 npm run dev
 ```
 
